@@ -25,7 +25,8 @@ namespace Bounding_Box_Patch_Calculator
             Console.WriteLine("Most of the time you DO NOT want to use direct bone indicies, from what I can tell, but I made it an option.");
             Console.WriteLine();
 
-            var useDirectBoneIndicies = UseDirectBoneIndicies();
+            Console.WriteLine("Use direct bone indicies? [Y/N] (Change this if you don't get desired output)");
+            var useDirectBoneIndicies = YesOrNo();
 
             var parts = Directory.GetFiles(ExeDir, "*partsbnd");
 
@@ -85,9 +86,8 @@ namespace Bounding_Box_Patch_Calculator
             }
         }
 
-        private static bool UseDirectBoneIndicies()
+        private static bool YesOrNo()
         {
-            Console.WriteLine("Use direct bone indicies? [Y/N] (Change this if you don't get desired output)");
             var result = Console.ReadKey();
             Console.WriteLine();
             if (result.Key == ConsoleKey.Y)
@@ -95,7 +95,7 @@ namespace Bounding_Box_Patch_Calculator
             else if (result.Key == ConsoleKey.N)
                 return false;
             else
-                return UseDirectBoneIndicies();
+                return YesOrNo();
         }
     }
 }

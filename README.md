@@ -13,7 +13,7 @@
 
 ### Thank you
 
-**[Meowmaritus](https://gist.github.com/Meowmaritus)** for the awesome tools he makes.  
+**[Meowmaritus](https://gist.github.com/Meowmaritus)** for the awesome tools he makes. If it weren't for his work, this tool would likely not be possible.    
 
 ### Patch Notes  
 ## V 1

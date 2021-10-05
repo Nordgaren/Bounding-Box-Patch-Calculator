@@ -11,6 +11,9 @@
 
 2) Drop Bounding Box Patch Calculator.exe into the folder and run it.  
 
+### Thank you
+**[Meowmaritus](https://gist.github.com/Meowmaritus)** for the awesome tools he makes.  
+
 ### Patch Notes  
 ## V 1
 * Initial Release

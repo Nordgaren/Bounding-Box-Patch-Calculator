@@ -11,6 +11,7 @@ namespace Bounding_Box_Patch_Calculator
 {
     class Program
     {
+        public static string ExeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
         static void Main(string[] args)
         {
@@ -19,9 +20,15 @@ namespace Bounding_Box_Patch_Calculator
 #endif
             if (args.Length == 0)
             {
-                Console.WriteLine("No parts files detected. Drag and drop the parts you want to patch onto this exe.");
-                Console.ReadLine();
-                return;
+                args = Directory.GetFiles(ExeDir, "*.partsbnd*");
+
+                if (args.Length == 0)
+                {
+                    Console.WriteLine("No parts files detected. Drag and drop the parts you want to patch onto this exe, " +
+                        "or run this exe in a folder full of parstbnds");
+                    Console.ReadLine();
+                    return;
+                }
             }
 
             Console.WriteLine("This program just recalculates the bounding box of each mesh's bones using the Bounding Box Solver from FBX2FLVER.");
@@ -32,10 +39,10 @@ namespace Bounding_Box_Patch_Calculator
             Console.WriteLine("Use direct bone indicies? [Y/N] (Change this if you don't get desired output)");
             var useDirectBoneIndicies = YesOrNo();
 
-            Console.WriteLine("Would you like to use a custom bounding box multiplier? [Y/N] (Default is 2)");
+            Console.WriteLine("Would you like to use a custom bounding box multiplier? [Y/N] (Default is 2.25)");
             var useCustomMultiplier = YesOrNo();
 
-            float multiplier = 2;
+            float multiplier = 2.25f;
             if (useCustomMultiplier)
             {
                 Console.WriteLine("Enter a custom multiplier (eg 1.5)");
@@ -45,7 +52,7 @@ namespace Bounding_Box_Patch_Calculator
                 if (!tryParse)
                 {
                     Console.WriteLine("Invalid Multiplier. Using default");
-                    multiplier = 2;
+                    multiplier = 2.25f;
                 }
             }
 

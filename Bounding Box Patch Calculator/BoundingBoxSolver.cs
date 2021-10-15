@@ -113,7 +113,7 @@ namespace Bounding_Box_Patch_Calculator
             return boneParentMatrix;
         }
 
-        float Multiplier = 2f;
+        float Multiplier = 2.25f;
 
         public void SetMuliplier(float multiplier)
         {

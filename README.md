@@ -17,7 +17,7 @@
 
 ### Patch Notes 
 ## V 1.1  
-* Is now a Drag and Drop EXE  
+* Is now a Drag and Drop EXE. Drag Partsbnds onto the exe to patch them.  
 * Added multiplier to Bounding Box Calculation (Default is 2x)  
 * Added option for custom multiplier  
 ## V 1  

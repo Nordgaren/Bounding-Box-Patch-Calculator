@@ -12,14 +12,18 @@ namespace Bounding_Box_Patch_Calculator
     class Program
     {
 
-        public static string ExeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-
         static void Main(string[] args)
         {
-
 #if DEBUG
-            ExeDir = $@"Path\To\Test\Folder";
+            args = new string[] { @"F:\Dark Souls Mod Stuff\Remastest 1.4 Beta\DATA\parts\HD_A_9500.partsbnd" };
 #endif
+            if (args.Length == 0)
+            {
+                Console.WriteLine("No parts files detected. Drag and drop the parts you want to patch onto this exe.");
+                Console.ReadLine();
+                return;
+            }
+
             Console.WriteLine("This program just recalculates the bounding box of each mesh's bones using the Bounding Box Solver from FBX2FLVER.");
             Console.WriteLine("To use this patcher, move the files you're trying to patch to a new folder and run this exe inside that folder.");
             Console.WriteLine("Most of the time you DO NOT want to use direct bone indicies, from what I can tell, but I made it an option.");
@@ -28,27 +32,35 @@ namespace Bounding_Box_Patch_Calculator
             Console.WriteLine("Use direct bone indicies? [Y/N] (Change this if you don't get desired output)");
             var useDirectBoneIndicies = YesOrNo();
 
-            var parts = Directory.GetFiles(ExeDir, "*partsbnd");
+            Console.WriteLine("Would you like to use a custom bounding box multiplier? [Y/N] (Default is 2)");
+            var useCustomMultiplier = YesOrNo();
 
-            if (parts.Count() == 0)
-                parts = Directory.GetFiles(ExeDir, "*partsbnd.dcx");
-
-            if (parts.Count() == 0)
+            float multiplier = 2;
+            if (useCustomMultiplier)
             {
-                Console.WriteLine("No parts files detected. Put this EXE in a folder with the parts you want to patch (and only those parts)");
-                Console.ReadLine();
-                return;
+                Console.WriteLine("Enter a custom multiplier (eg 1.5)");
+                var input = Console.ReadLine();
+                var tryParse = float.TryParse(input, out multiplier);
+
+                if (!tryParse)
+                {
+                    Console.WriteLine("Invalid Multiplier. Using default");
+                    multiplier = 2;
+                }
             }
 
-            PatchFiles(useDirectBoneIndicies, parts);
+            PatchFiles(useDirectBoneIndicies, args, multiplier);
         }
 
-        private static void PatchFiles(bool useDirectBoneIndicies, string[] parts)
+        private static void PatchFiles(bool useDirectBoneIndicies, string[] parts, float multiplier)
         {
             var boundingBoxSolver = new BoundingBoxSolver(useDirectBoneIndicies);
+            boundingBoxSolver.SetMuliplier(multiplier);
 
             foreach (var file in parts)
             {
+                if (!file.Contains(".partsbnd") || !file.Contains(".partsbnd.dcx"))
+
                 if (!File.Exists($"{file}.bak"))
                     File.Copy(file, $"{file}.bak");
 

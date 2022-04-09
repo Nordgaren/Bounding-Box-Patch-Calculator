@@ -16,6 +16,8 @@
 **[Meowmaritus](https://gist.github.com/Meowmaritus)** for the awesome tools he makes. If it weren't for his work, this tool would likely not be possible.    
 
 ### Patch Notes
+## V 1.3
+* Now 64 bit and compatible with Elden Ring
 ## V 1.2
 * changes default multiplier to 2.25
 * Can now use as drag and drop or run exe in file full of partsbnds

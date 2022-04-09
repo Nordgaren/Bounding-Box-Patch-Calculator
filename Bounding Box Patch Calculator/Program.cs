@@ -16,7 +16,7 @@ namespace Bounding_Box_Patch_Calculator
         static void Main(string[] args)
         {
 #if DEBUG
-            args = new string[] { @"F:\Dark Souls Mod Stuff\Remastest 1.4 Beta\DATA\parts\HD_A_9500.partsbnd" };
+            args = new string[] { @"C:\Users\Nord\source\repos\Bounding-Box-Patch-Calculator\AM_A_2870.partsbnd" };
 #endif
             if (args.Length == 0)
             {
@@ -66,7 +66,8 @@ namespace Bounding_Box_Patch_Calculator
 
             foreach (var file in parts)
             {
-                if (!file.Contains(".partsbnd") || !file.Contains(".partsbnd.dcx"))
+                if (!file.Contains(".partsbnd"))
+                    continue;
 
                 if (!File.Exists($"{file}.bak"))
                     File.Copy(file, $"{file}.bak");
@@ -74,17 +75,18 @@ namespace Bounding_Box_Patch_Calculator
                 Console.WriteLine(file);
                 BND3 ogPartBND3;
                 BND4 ogPartBND4;
-                if (BND3.Is(file))
-                {
-                    ogPartBND3 = BND3.Read(file);
-                    PatchParts(boundingBoxSolver, file, ogPartBND3);
-                    ogPartBND3.Write(file);
-                }
-                else if (BND4.Is(file))
+                
+                if (BND4.Is(file))
                 {
                     ogPartBND4 = BND4.Read(file);
                     PatchParts(boundingBoxSolver, file, ogPartBND4);
                     ogPartBND4.Write(file);
+                }
+                else if (BND3.Is(file))
+                {
+                    ogPartBND3 = BND3.Read(file);
+                    PatchParts(boundingBoxSolver, file, ogPartBND3);
+                    ogPartBND3.Write(file);
                 }
 
             }

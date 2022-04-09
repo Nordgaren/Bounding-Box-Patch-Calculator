@@ -1,10 +1,11 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SoulsFormats;
+using SharpDX;
+
 
 namespace Bounding_Box_Patch_Calculator
 {
@@ -24,13 +25,13 @@ namespace Bounding_Box_Patch_Calculator
             UseDirectBoneIndices = useDirectBoneIndices;
         }
 
-        private Dictionary<FLVER.Vertex, List<FLVER2.Bone>> PrecalculatedBoneLists = new Dictionary<FLVER.Vertex, List<FLVER2.Bone>>();
+        private Dictionary<FLVER.Vertex, List<FLVER.Bone>> PrecalculatedBoneLists = new Dictionary<FLVER.Vertex, List<FLVER.Bone>>();
 
-        private List<FLVER2.Bone> GetAllBonesReferencedByVertex(FLVER2 f, FLVER2.Mesh m, FLVER.Vertex v)
+        private List<FLVER.Bone> GetAllBonesReferencedByVertex(FLVER2 f, FLVER2.Mesh m, FLVER.Vertex v)
         {
             if (!PrecalculatedBoneLists.ContainsKey(v))
             {
-                List<FLVER2.Bone> result = new List<FLVER2.Bone>();
+                List<FLVER.Bone> result = new List<FLVER.Bone>();
 
                 foreach (var vertBoneIndex in v.BoneIndices)
                 {
@@ -57,7 +58,7 @@ namespace Bounding_Box_Patch_Calculator
             return PrecalculatedBoneLists[v];
         }
 
-        private List<FLVER.Vertex> GetVerticesParentedToBone(FLVER2 f, FLVER2.Bone b)
+        private List<FLVER.Vertex> GetVerticesParentedToBone(FLVER2 f, FLVER.Bone b)
         {
             var result = new List<FLVER.Vertex>();
             foreach (var sm in f.Meshes)
@@ -72,31 +73,31 @@ namespace Bounding_Box_Patch_Calculator
             return result;
         }
 
-        private BoundingBox GetBoundingBox(List<Vector3> verts)
+        private BoundingBox GetBoundingBox(Vector3[] verts)
         {
-            if (verts.Count > 0)
-                return BoundingBox.CreateFromPoints(verts);
+            if (verts.Length > 0)
+                return BoundingBox.FromPoints(verts);
             else
                 return new BoundingBox(Vector3.Zero, Vector3.Zero);
         }
 
-        Matrix GetParentBoneMatrix(FLVER2 f, FLVER2.Bone bone)
+        Matrix GetParentBoneMatrix(FLVER2 f, FLVER.Bone bone)
         {
-            FLVER2.Bone parent = bone;
+            FLVER.Bone parent = bone;
 
             var boneParentMatrix = Matrix.Identity;
 
             do
             {
-                boneParentMatrix *= Matrix.CreateScale(parent.Scale.X, parent.Scale.Y, parent.Scale.Z);
-                boneParentMatrix *= Matrix.CreateRotationX(parent.Rotation.X);
-                boneParentMatrix *= Matrix.CreateRotationZ(parent.Rotation.Z);
-                boneParentMatrix *= Matrix.CreateRotationY(parent.Rotation.Y);
+                boneParentMatrix *= Matrix.Scaling(parent.Scale.X, parent.Scale.Y, parent.Scale.Z);
+                boneParentMatrix *= Matrix.Scaling(parent.Rotation.X);
+                boneParentMatrix *= Matrix.RotationZ(parent.Rotation.Z);
+                boneParentMatrix *= Matrix.RotationY(parent.Rotation.Y);
 
                 //boneParentMatrix *= Matrix.CreateRotationZ(parent.EulerRadian.Z);
                 //boneParentMatrix *= Matrix.CreateRotationX(parent.EulerRadian.X);
                 //boneParentMatrix *= Matrix.CreateRotationY(parent.EulerRadian.Y);
-                boneParentMatrix *= Matrix.CreateTranslation(parent.Translation.X, parent.Translation.Y, parent.Translation.Z);
+                boneParentMatrix *= Matrix.Translation(parent.Translation.X, parent.Translation.Y, parent.Translation.Z);
                 //boneParentMatrix *= Matrix.CreateScale(parent.Scale);
 
                 if (parent.ParentIndex >= 0)
@@ -120,15 +121,15 @@ namespace Bounding_Box_Patch_Calculator
             Multiplier = multiplier;
         }
 
-        private void SetBoneBoundingBox(FLVER2 f, FLVER2.Bone b)
+        private void SetBoneBoundingBox(FLVER2 f, FLVER.Bone b)
         {
             var multiplierVector = new System.Numerics.Vector3(Multiplier, Multiplier, Multiplier);
-            var bb = GetBoundingBox(GetVerticesParentedToBone(f, b).Select(v => new Vector3(v.Position.X, v.Position.Y, v.Position.Z)).ToList());
-            if (bb.Max.LengthSquared() != 0 || bb.Min.LengthSquared() != 0)
+            var bb = GetBoundingBox(GetVerticesParentedToBone(f, b).Select(v => new Vector3(v.Position.X, v.Position.Y, v.Position.Z)).ToArray());
+            if (bb.Maximum.LengthSquared() != 0 || bb.Minimum.LengthSquared() != 0)
             {
                 var matrix = GetParentBoneMatrix(f, b);
-                b.BoundingBoxMin = Vector3.Transform(bb.Min, Matrix.Invert(matrix)).ToNumerics();
-                b.BoundingBoxMax = Vector3.Transform(bb.Max, Matrix.Invert(matrix)).ToNumerics();
+                b.BoundingBoxMin = Vector3.Transform(bb.Minimum, Matrix.Invert(matrix)).ToNumerics();
+                b.BoundingBoxMax = Vector3.Transform(bb.Maximum, Matrix.Invert(matrix)).ToNumerics();
                 b.BoundingBoxMin = System.Numerics.Vector3.Multiply(b.BoundingBoxMin, multiplierVector);
                 b.BoundingBoxMax = System.Numerics.Vector3.Multiply(b.BoundingBoxMax, multiplierVector);
             }
@@ -145,6 +146,8 @@ namespace Bounding_Box_Patch_Calculator
 
             foreach (var b in f.Bones)
             {
+                var boneParentMatrix = Matrix.Scaling(b.Rotation.X);
+
                 SetBoneBoundingBox(f, b);
                 //if (b.Name == "Dummy")
                 //    b.Name = "dymmy";
@@ -157,13 +160,13 @@ namespace Bounding_Box_Patch_Calculator
 
             foreach (var sm in f.Meshes)
             {
-                var bb = GetBoundingBox(sm.Vertices.Select(v => new Vector3(v.Position.X, v.Position.Y, v.Position.Z)).ToList());
-                if (bb.Max.LengthSquared() != 0 || bb.Min.LengthSquared() != 0)
+                var bb = GetBoundingBox(sm.Vertices.Select(v => new Vector3(v.Position.X, v.Position.Y, v.Position.Z)).ToArray());
+                if (bb.Maximum.LengthSquared() != 0 || bb.Minimum.LengthSquared() != 0)
                 {
                     submeshBBs.Add(bb);
                     sm.BoundingBox = new FLVER2.Mesh.BoundingBoxes();
-                    sm.BoundingBox.Min = bb.Min.ToNumerics();
-                    sm.BoundingBox.Max = bb.Max.ToNumerics();
+                    sm.BoundingBox.Min = bb.Minimum.ToNumerics();
+                    sm.BoundingBox.Max = bb.Maximum.ToNumerics();
                 }
                 else
                 {
@@ -176,11 +179,12 @@ namespace Bounding_Box_Patch_Calculator
                 var finalBB = submeshBBs[0];
                 for (int i = 1; i < submeshBBs.Count; i++)
                 {
-                    finalBB = BoundingBox.CreateMerged(finalBB, submeshBBs[i]);
+                    finalBB = BoundingBox.Merge(finalBB, submeshBBs[i]);
                 }
+
                 var multiplierVector = new System.Numerics.Vector3(Multiplier, Multiplier, Multiplier);
-                f.Header.BoundingBoxMin = new System.Numerics.Vector3(finalBB.Min.X, finalBB.Min.Y, finalBB.Min.Z);
-                f.Header.BoundingBoxMax = new System.Numerics.Vector3(finalBB.Max.X, finalBB.Max.Y, finalBB.Max.Z);
+                f.Header.BoundingBoxMin = new System.Numerics.Vector3(finalBB.Minimum.X, finalBB.Minimum.Y, finalBB.Minimum.Z);
+                f.Header.BoundingBoxMax = new System.Numerics.Vector3(finalBB.Maximum.X, finalBB.Maximum.Y, finalBB.Maximum.Z);
                 f.Header.BoundingBoxMin = System.Numerics.Vector3.Multiply(f.Header.BoundingBoxMin, multiplierVector);
                 f.Header.BoundingBoxMax = System.Numerics.Vector3.Multiply(f.Header.BoundingBoxMax, multiplierVector);
             }

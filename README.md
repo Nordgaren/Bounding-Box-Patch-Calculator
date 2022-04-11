@@ -14,8 +14,11 @@
 ### Thank you
 
 **[Meowmaritus](https://gist.github.com/Meowmaritus)** for the awesome tools he makes. If it weren't for his work, this tool would likely not be possible.    
+**[Dropoff](https://www.nexusmods.com/users/57663811)** helped me figure out how to patch dynamic meshes 
 
 ### Patch Notes
+## V 1.4
+* Correctly patches bounding boxes with dynamic meshes thanks to Dropoff
 ## V 1.3
 * Now 64 bit and compatible with Elden Ring
 ## V 1.2

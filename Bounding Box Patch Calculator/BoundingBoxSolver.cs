@@ -33,11 +33,16 @@ namespace Bounding_Box_Patch_Calculator
             {
                 List<FLVER.Bone> result = new List<FLVER.Bone>();
 
-                foreach (var vertBoneIndex in v.BoneIndices)
+                foreach (var vbi in v.BoneIndices)
                 {
+                    var vertBoneIndex = vbi;
+
                     if (vertBoneIndex >= 0)
                     {
-                        if (vertBoneIndex >= f.Bones.Count() || vertBoneIndex >= m.BoneIndices.Count())
+                        if (m.Dynamic == 0)
+                            vertBoneIndex = v.NormalW;
+
+                        if (vertBoneIndex >= f.Bones.Count() || (vertBoneIndex >= m.BoneIndices.Count() && vertBoneIndex >= v.BoneIndices.Count()))
                             continue;
 
                         if (UseDirectBoneIndices)
@@ -46,8 +51,10 @@ namespace Bounding_Box_Patch_Calculator
                         }
                         else
                         {
-                            if (m.BoneIndices[vertBoneIndex] >= 0)
+                            if (m.BoneIndices.Count() > 0 && m.BoneIndices[vertBoneIndex] >= 0)
                                 result.Add(f.Bones[m.BoneIndices[vertBoneIndex]]);
+                            else if (v.BoneIndices.Count() > 0 && v.BoneIndices[vertBoneIndex] >= 0)
+                                result.Add(f.Bones[vertBoneIndex]);
                         }
                     }
                 }
@@ -140,20 +147,41 @@ namespace Bounding_Box_Patch_Calculator
             }
         }
 
+        private void SetMeshBoundingBox(FLVER2 f, FLVER2.Mesh m)
+        {
+            //var multiplierVector = new System.Numerics.Vector3(Multiplier, Multiplier, Multiplier);
+            //var bb = GetBoundingBox(GetVerticesParentedToBone(f, m).Select(v => new Vector3(v.Position.X, v.Position.Y, v.Position.Z)).ToArray());
+            //if (bb.Maximum.LengthSquared() != 0 || bb.Minimum.LengthSquared() != 0)
+            //{
+            //    var matrix = GetParentBoneMatrix(f, m);
+            //    m.BoundingBox.Min = Vector3.Transform(bb.Minimum, Matrix.Invert(matrix)).ToNumerics();
+            //    m.BoundingBox.Max = Vector3.Transform(bb.Maximum, Matrix.Invert(matrix)).ToNumerics();
+            //    m.BoundingBox.Min = System.Numerics.Vector3.Multiply(m.BoundingBox.Min, multiplierVector);
+            //    m.BoundingBox.Max = System.Numerics.Vector3.Multiply(m.BoundingBox.Max, multiplierVector);
+            //}
+            //else
+            //{
+            //    m.BoundingBox.Min = new System.Numerics.Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            //    m.BoundingBox.Max = new System.Numerics.Vector3(float.MinValue, float.MinValue, float.MinValue);
+            //}
+        }
+
         public void FixAllBoundingBoxes(FLVER2 f)
         {
             PrecalculatedBoneLists.Clear();
 
             foreach (var b in f.Bones)
             {
-                var boneParentMatrix = Matrix.Scaling(b.Rotation.X);
 
                 SetBoneBoundingBox(f, b);
-                //if (b.Name == "Dummy")
-                //    b.Name = "dymmy";
-                //else if (b.Name == "SFX")
-                //    b.Name = "SFX用";
+
             }
+
+            //foreach (var m in f.Meshes)
+            //{
+            //    if (m.BoundingBox != null)
+            //        SetMeshBoundingBox(f, m);
+            //}
 
 
             var submeshBBs = new List<BoundingBox>();
@@ -187,11 +215,31 @@ namespace Bounding_Box_Patch_Calculator
                 f.Header.BoundingBoxMax = new System.Numerics.Vector3(finalBB.Maximum.X, finalBB.Maximum.Y, finalBB.Maximum.Z);
                 f.Header.BoundingBoxMin = System.Numerics.Vector3.Multiply(f.Header.BoundingBoxMin, multiplierVector);
                 f.Header.BoundingBoxMax = System.Numerics.Vector3.Multiply(f.Header.BoundingBoxMax, multiplierVector);
+
+                //foreach (var m in f.Meshes)
+                //{
+                //    if (m.BoundingBox == null)
+                //        continue;
+
+                //    m.BoundingBox.Min = new System.Numerics.Vector3(finalBB.Minimum.X, finalBB.Minimum.Y, finalBB.Minimum.Z);
+                //    m.BoundingBox.Max = new System.Numerics.Vector3(finalBB.Maximum.X, finalBB.Maximum.Y, finalBB.Maximum.Z);
+                //    m.BoundingBox.Min = System.Numerics.Vector3.Multiply(f.Header.BoundingBoxMin, multiplierVector);
+                //    m.BoundingBox.Max = System.Numerics.Vector3.Multiply(f.Header.BoundingBoxMax, multiplierVector);
+                //}
             }
             else
             {
                 f.Header.BoundingBoxMin = new System.Numerics.Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
                 f.Header.BoundingBoxMax = new System.Numerics.Vector3(float.MinValue, float.MinValue, float.MinValue);
+
+                //foreach (var m in f.Meshes)
+                //{
+                //    if (m.BoundingBox == null)
+                //        continue;
+
+                //    m.BoundingBox.Min = new System.Numerics.Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+                //    m.BoundingBox.Max = new System.Numerics.Vector3(float.MinValue, float.MinValue, float.MinValue);
+                //}
             }
 
 

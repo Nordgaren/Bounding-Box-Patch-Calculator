@@ -16,7 +16,7 @@ namespace Bounding_Box_Patch_Calculator
         static void Main(string[] args)
         {
 #if DEBUG
-            args = new string[] { @"C:\Users\Nord\source\repos\Bounding-Box-Patch-Calculator\AM_A_2870.partsbnd" };
+            args = new string[] { @"C:\Users\Nord\source\repos\Bounding-Box-Patch-Calculator\wp_a_0612.partsbnd.dcx" };
 #endif
             if (args.Length == 0)
             {

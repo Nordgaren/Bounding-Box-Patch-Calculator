@@ -16,7 +16,7 @@ namespace Bounding_Box_Patch_Calculator
         static void Main(string[] args)
         {
 #if DEBUG
-            args = new string[] { @"C:\Users\Nord\source\repos\Bounding-Box-Patch-Calculator\wp_a_0612.partsbnd.dcx" };
+            args = new string[] { @"C:\Users\Nord\source\repos\Bounding-Box-Patch-Calculator\wp_a_0554.partsbnd.dcx" };
 #endif
             if (args.Length == 0)
             {
@@ -94,15 +94,15 @@ namespace Bounding_Box_Patch_Calculator
 
         private static void PatchParts(BoundingBoxSolver boundingBoxSolver, string file, IBinder ogPart)
         {
-            foreach (var item in ogPart.Files)
+            for (int i = 0; i < ogPart.Files.Count; i++)
             {
-                if (item.Name.EndsWith(".flver"))
+                if (ogPart.Files[i].Name.EndsWith(".flver"))
                 {
-                    var ogFLVERBytes = FLVER2.Read(item.Bytes);
+                    var ogFLVERBytes = FLVER2.Read(ogPart.Files[i].Bytes);
 
                     boundingBoxSolver.FixAllBoundingBoxes(ogFLVERBytes);
 
-                    ogPart.Files[1].Bytes = ogFLVERBytes.Write();
+                    ogPart.Files[i].Bytes = ogFLVERBytes.Write();
                 }
             }
         }

@@ -17,6 +17,8 @@
 **[Dropoff](https://www.nexusmods.com/users/57663811)** helped me figure out how to patch dynamic meshes 
 
 ### Patch Notes
+## V 1.5
+* Correctly places flvers back where they belong, not thanks to Nordgaren
 ## V 1.4
 * Correctly patches bounding boxes with dynamic meshes thanks to Dropoff
 ## V 1.3

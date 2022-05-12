@@ -42,7 +42,7 @@ namespace Bounding_Box_Patch_Calculator
                         if (m.Dynamic == 0)
                             vertBoneIndex = v.NormalW;
 
-                        if (vertBoneIndex >= f.Bones.Count() || (vertBoneIndex >= m.BoneIndices.Count() && vertBoneIndex >= v.BoneIndices.Count()))
+                        if (vertBoneIndex >= f.Bones.Count() || (vertBoneIndex >= m.BoneIndices.Count() && vertBoneIndex >= v.BoneIndices.Length))
                             continue;
 
                         if (UseDirectBoneIndices)
@@ -53,7 +53,7 @@ namespace Bounding_Box_Patch_Calculator
                         {
                             if (m.BoneIndices.Count() > 0 && m.BoneIndices[vertBoneIndex] >= 0)
                                 result.Add(f.Bones[m.BoneIndices[vertBoneIndex]]);
-                            else if (v.BoneIndices.Count() > 0 && v.BoneIndices[vertBoneIndex] >= 0)
+                            else if (v.BoneIndices.Length > 0 && v.BoneIndices[vertBoneIndex] >= 0)
                                 result.Add(f.Bones[vertBoneIndex]);
                         }
                     }
@@ -84,8 +84,8 @@ namespace Bounding_Box_Patch_Calculator
         {
             if (verts.Length > 0)
                 return BoundingBox.FromPoints(verts);
-            else
-                return new BoundingBox(Vector3.Zero, Vector3.Zero);
+
+            return new BoundingBox(Vector3.Zero, Vector3.Zero);
         }
 
         Matrix GetParentBoneMatrix(FLVER2 f, FLVER.Bone bone)
@@ -162,17 +162,19 @@ namespace Bounding_Box_Patch_Calculator
 
             foreach (var sm in f.Meshes)
             {
+                sm.BoundingBox = new FLVER2.Mesh.BoundingBoxes();
                 var bb = GetBoundingBox(sm.Vertices.Select(v => new Vector3(v.Position.X, v.Position.Y, v.Position.Z)).ToArray());
                 if (bb.Maximum.LengthSquared() != 0 || bb.Minimum.LengthSquared() != 0)
                 {
                     submeshBBs.Add(bb);
-                    sm.BoundingBox = new FLVER2.Mesh.BoundingBoxes();
                     sm.BoundingBox.Min = bb.Minimum.ToNumerics();
                     sm.BoundingBox.Max = bb.Maximum.ToNumerics();
                 }
                 else
                 {
-                    sm.BoundingBox = null;
+                    sm.BoundingBox.Min = new System.Numerics.Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+                    sm.BoundingBox.Max = new System.Numerics.Vector3(float.MinValue, float.MinValue, float.MinValue);
+                    //sm.BoundingBox = null;
                 }
             }
 

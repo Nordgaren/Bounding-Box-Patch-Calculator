@@ -16,7 +16,7 @@ namespace Bounding_Box_Patch_Calculator
         static void Main(string[] args)
         {
 #if DEBUG
-            args = new string[] { @"C:\Users\Nord\source\repos\Bounding-Box-Patch-Calculator\wp_a_0554.partsbnd.dcx" };
+            args = new string[] { @"G:\Steam\steamapps\common\ELDEN RING 1.04.2\Game\parts\wp_a_0454-partsbnd-dcx\GR\data\INTERROOT_win64\parts\Weapon\WP_A_9935\WP_A_9935.flver" };
 #endif
             if (args.Length == 0)
             {
@@ -66,6 +66,9 @@ namespace Bounding_Box_Patch_Calculator
 
             foreach (var file in parts)
             {
+                if (file.Contains(".flver"))
+                    PatchFlver(boundingBoxSolver, file, FLVER2.Read(file));
+
                 if (!file.Contains(".partsbnd"))
                     continue;
 
@@ -75,7 +78,7 @@ namespace Bounding_Box_Patch_Calculator
                 Console.WriteLine(file);
                 BND3 ogPartBND3;
                 BND4 ogPartBND4;
-                
+
                 if (BND4.Is(file))
                 {
                     ogPartBND4 = BND4.Read(file);
@@ -106,6 +109,51 @@ namespace Bounding_Box_Patch_Calculator
                 }
             }
         }
+
+        private static void PatchFlver(BoundingBoxSolver boundingBoxSolver, string file, FLVER2 ogFlver)
+        {
+            if (!File.Exists($"{file}.bak"))
+                File.Copy(file, $"{file}.bak");
+
+#if DEBUG
+            PrintDebugInfo(file, ogFlver);
+#endif
+
+            boundingBoxSolver.FixAllBoundingBoxes(ogFlver);
+#if DEBUG
+            PrintDebugInfo(file, ogFlver);
+#endif
+            ogFlver.Write(file);
+        }
+
+        private static void PrintDebugInfo(string file, FLVER2 ogFlver)
+        {
+            Console.WriteLine();
+            Console.WriteLine($"{file}");
+            Console.WriteLine("Header");
+            Console.WriteLine($"BBMin: {ogFlver.Header.BoundingBoxMin}");
+            Console.WriteLine($"BBMax: {ogFlver.Header.BoundingBoxMax}");
+            Console.WriteLine();
+            Console.WriteLine("Bones");
+            foreach (FLVER.Bone bone in ogFlver.Bones)
+            {
+                Console.WriteLine($"{bone.Name}");
+                Console.WriteLine($"BBMin: {bone.BoundingBoxMin}");
+                Console.WriteLine($"BBMax: {bone.BoundingBoxMax}");
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Meshes");
+            int num = 0;
+            foreach (FLVER2.Mesh mesh in ogFlver.Meshes)
+            {
+                Console.WriteLine($"{mesh} {num}");
+                Console.WriteLine($"BBMin: {mesh.BoundingBox?.Min}");
+                Console.WriteLine($"BBMax: {mesh.BoundingBox?.Max}");
+                num++;
+            }
+        }
+
 
         private static bool YesOrNo()
         {

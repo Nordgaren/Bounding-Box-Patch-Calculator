@@ -7,6 +7,7 @@ namespace Bounding_Box_Patch_Calculator
 {
     public static class BoundingBoxSolver
     {
+        //Meowmaritus showed me the way
         public static void FixAllBoundingBoxes(FLVER2 flver)
         {
             flver.Header.BoundingBoxMin = new System.Numerics.Vector3();
@@ -42,7 +43,6 @@ namespace Bounding_Box_Patch_Calculator
                         }
                         else
                         {
-                            //Logger.LogWarning($"Vertex skinned to bone '{bone.Name}' which does NOT exist in the skeleton.");
                             boneDoesNotExist = true;
                         }
 

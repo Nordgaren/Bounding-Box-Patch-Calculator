@@ -16,7 +16,7 @@
 
 ### Thank you
 
-**[Meowmaritus](https://github.com/Meowmaritus)** for the awesome tools he makes. If it weren't for his work, this tool would likely not be possible.  
+**[Meowmaritus](https://github.com/Meowmaritus)** for the awesome tools he makes. If it weren't for meows work, this tool would likely not be possible. Also creator of [Souls Asset Pipeline](https://github.com/Meowmaritus/SoulsAssetPipeline)  
 **Pear** figured out what I was doing wrong. :fatcat:  
 **[Dropoff](https://www.nexusmods.com/users/57663811)** helped me figure out how to patch dynamic meshes 
 

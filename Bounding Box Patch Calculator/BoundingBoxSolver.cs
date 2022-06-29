@@ -125,6 +125,7 @@ namespace Bounding_Box_Patch_Calculator
 
         public void SetMuliplier(float multiplier)
         {
+            var lol = Matrix.Identity;
             Multiplier = multiplier;
         }
 

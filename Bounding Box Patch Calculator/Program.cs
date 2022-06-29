@@ -16,16 +16,16 @@ namespace Bounding_Box_Patch_Calculator
         static void Main(string[] args)
         {
 #if DEBUG
-            args = new string[] { @"G:\Steam\steamapps\common\ELDEN RING 1.04.2\Game\parts\wp_a_0454-partsbnd-dcx\GR\data\INTERROOT_win64\parts\Weapon\WP_A_9935\WP_A_9935.flver" };
+            args = new string[] { @"G:\Steam\steamapps\common\ELDEN RING 1.04.2\Game\parts\wp_a_0919.partsbnd.dcx" };
 #endif
             if (args.Length == 0)
             {
-                args = Directory.GetFiles(ExeDir, "*.partsbnd*");
+                args = Directory.GetFiles(ExeDir, "*.partsbnd*", SearchOption.TopDirectoryOnly);
 
                 if (args.Length == 0)
                 {
                     Console.WriteLine("No parts files detected. Drag and drop the parts you want to patch onto this exe, " +
-                        "or run this exe in a folder full of parstbnds");
+                        "or run this exe in a folder full of parstbnds/flvers (Will not look in nested folders)");
                     Console.ReadLine();
                     return;
                 }
@@ -72,24 +72,15 @@ namespace Bounding_Box_Patch_Calculator
                 if (!file.Contains(".partsbnd"))
                     continue;
 
-                if (!File.Exists($"{file}.bak"))
-                    File.Copy(file, $"{file}.bak");
-
-                Console.WriteLine(file);
-                BND3 ogPartBND3;
-                BND4 ogPartBND4;
-
-                if (BND4.Is(file))
+                if (BND4.IsRead(file, out BND4 partBND4))
                 {
-                    ogPartBND4 = BND4.Read(file);
-                    PatchParts(boundingBoxSolver, file, ogPartBND4);
-                    ogPartBND4.Write(file);
+                    PatchParts(boundingBoxSolver, file, partBND4);
+                    partBND4.Write(file);
                 }
-                else if (BND3.Is(file))
+                else if (BND3.IsRead(file, out BND3 partBND3))
                 {
-                    ogPartBND3 = BND3.Read(file);
-                    PatchParts(boundingBoxSolver, file, ogPartBND3);
-                    ogPartBND3.Write(file);
+                    PatchParts(boundingBoxSolver, file, partBND3);
+                    partBND3.Write(file);
                 }
 
             }
@@ -97,21 +88,32 @@ namespace Bounding_Box_Patch_Calculator
 
         private static void PatchParts(BoundingBoxSolver boundingBoxSolver, string file, IBinder ogPart)
         {
+            Console.WriteLine(file);
+
+            if (!File.Exists($"{file}.bak"))
+                File.Copy(file, $"{file}.bak");
+
             for (int i = 0; i < ogPart.Files.Count; i++)
             {
                 if (ogPart.Files[i].Name.EndsWith(".flver"))
                 {
-                    var ogFLVERBytes = FLVER2.Read(ogPart.Files[i].Bytes);
-
-                    boundingBoxSolver.FixAllBoundingBoxes(ogFLVERBytes);
-
-                    ogPart.Files[i].Bytes = ogFLVERBytes.Write();
+                    var ogFlver = FLVER2.Read(ogPart.Files[i].Bytes);
+#if DEBUG
+                    PrintDebugInfo(file, ogFlver);
+#endif
+                    boundingBoxSolver.FixAllBoundingBoxes(ogFlver);
+#if DEBUG
+                    PrintDebugInfo(file, ogFlver);
+#endif
+                    ogPart.Files[i].Bytes = ogFlver.Write();
                 }
             }
         }
 
         private static void PatchFlver(BoundingBoxSolver boundingBoxSolver, string file, FLVER2 ogFlver)
         {
+            Console.WriteLine(file);
+
             if (!File.Exists($"{file}.bak"))
                 File.Copy(file, $"{file}.bak");
 
@@ -126,6 +128,7 @@ namespace Bounding_Box_Patch_Calculator
             ogFlver.Write(file);
         }
 
+#if DEBUG
         private static void PrintDebugInfo(string file, FLVER2 ogFlver)
         {
             Console.WriteLine();
@@ -154,6 +157,7 @@ namespace Bounding_Box_Patch_Calculator
             }
         }
 
+#endif
 
         private static bool YesOrNo()
         {

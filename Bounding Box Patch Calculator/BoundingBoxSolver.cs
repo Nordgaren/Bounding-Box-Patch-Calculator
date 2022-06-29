@@ -21,7 +21,8 @@ namespace Bounding_Box_Patch_Calculator
             {
 
                 FLVER2.Mesh mesh = flver.Meshes[i];
-                mesh.BoundingBox = new FLVER2.Mesh.BoundingBoxes();
+                if (mesh.BoundingBox != null)
+                    mesh.BoundingBox = new FLVER2.Mesh.BoundingBoxes();
 
                 foreach (FLVER.Vertex vertex in mesh.Vertices)
                 {

@@ -3,20 +3,25 @@
 
 ## Current know compatability: 
 * Dark Souls: Prepare To Die Edition  
+* Elden Ring?  
 * In theory this should work for every game  
 
 ### Instructions  
 
-1) Make a folder with all the partsbnds you want to patch.  
+1) Make a folder with all the partsbnds and/or flvers you want to patch.  
 
 2) Drop Bounding Box Patch Calculator.exe into the folder and run it.  
 
+3) Optionally you can drag and drop a file onto the exe, as well!  
+
 ### Thank you
 
-**[Meowmaritus](https://gist.github.com/Meowmaritus)** for the awesome tools he makes. If it weren't for his work, this tool would likely not be possible.    
+**[Meowmaritus](https://github.com/Meowmaritus)** for the awesome tools he makes. If it weren't for his work, this tool would likely not be possible.    
 **[Dropoff](https://www.nexusmods.com/users/57663811)** helped me figure out how to patch dynamic meshes 
 
 ### Patch Notes
+## V 1.6
+* Switched over to using Meowmaritus' [Souls Asset Pipeline](https://github.com/Meowmaritus/SoulsAssetPipeline) which fixed most of the problems  
 ## V 1.5
 * Correctly places flvers back where they belong, not thanks to Nordgaren
 ## V 1.4

@@ -246,8 +246,12 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SoulsFormats\SoulsFormats\SoulsFormats.csproj">
-      <Project>{22c664bd-877b-44df-8ecf-2808522469a8}</Project>
+    <ProjectReference Include="..\..\SoulsAssetPipeline\SoulsAssetPipeline\SoulsAssetPipeline.csproj">
+      <Project>{3a0b3a2f-3aa1-4b7c-ace6-3e67709c722a}</Project>
+      <Name>SoulsAssetPipeline</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SoulsAssetPipeline\SoulsFormats\SoulsFormats\SoulsFormats.csproj">
+      <Project>{fa0971a6-f12d-44d9-b181-aede9907e854}</Project>
       <Name>SoulsFormats</Name>
     </ProjectReference>
   </ItemGroup>

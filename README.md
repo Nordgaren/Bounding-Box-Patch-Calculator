@@ -21,6 +21,9 @@
 **[Dropoff](https://www.nexusmods.com/users/57663811)** helped me figure out how to patch dynamic meshes 
 
 ### Patch Notes
+## V 1.7
+* Now automatically grabs oolde path, if it can.  
+* Fixed an issue where this tool only worked on partsbnds.  
 ## V 1.6
 * Switched over to using Meowmaritus' [Souls Asset Pipeline](https://github.com/Meowmaritus/SoulsAssetPipeline) which fixed most of the problems  
 ## V 1.5

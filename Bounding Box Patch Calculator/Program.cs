@@ -122,13 +122,12 @@ namespace Bounding_Box_Patch_Calculator
 
         private static void PatchParts(IBinder part)
         {
-
             foreach (BinderFile file in part.Files)
             {
-
                 if (FLVER2.IsRead(file.Bytes, out FLVER2 flver))
                 {
                     PatchFlver(flver);
+                    file.Bytes = flver.Write();
                 }
             }
         }

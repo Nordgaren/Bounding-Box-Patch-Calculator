@@ -16,7 +16,7 @@ namespace Bounding_Box_Patch_Calculator
         static void Main(string[] args)
         {
 #if DEBUG
-            args = new string[] { @"G:\Steam\steamapps\common\ELDEN RING 1.05\Game\parts\wp_a_0617.partsbnd.dcx" };
+            args = new string[] { @"C:\Users\Nord\Downloads\aeg040_097.geombnd.dcx.bak" };
 #endif
             if (args.Length == 0)
             {
@@ -59,10 +59,16 @@ namespace Bounding_Box_Patch_Calculator
             //}
 
             PatchFiles(args);
+            
+            if (OodleHandle != IntPtr.Zero)
+                Kernel32.FreeLibrary(OodleHandle);
+            
             Console.WriteLine("Press the Any Key to Terminate Program");
             Console.ReadKey();
         }
 
+        static IntPtr OodleHandle = IntPtr.Zero;
+        
         private static void PatchFiles(string[] parts)
         {
             foreach (var file in parts)
@@ -71,22 +77,44 @@ namespace Bounding_Box_Patch_Calculator
 
                 if (!File.Exists($"{file}.bak"))
                     File.Copy(file, $"{file}.bak");
-
-                if (file.Contains(".flver"))
-                    PatchFlver(file, FLVER2.Read(file));
-
-                if (!file.Contains(".partsbnd"))
-                    continue;
-
-                if (BND4.IsRead(file, out BND4 partBND4))
+                
+                TryPatchBND4(file);
+                
+                if (BND3.IsRead(file, out BND3 bnd3))
                 {
-                    PatchParts(partBND4);
-                    partBND4.Write(file);
+                    PatchParts(bnd3);
+                    bnd3.Write(file);
                 }
-                else if (BND3.IsRead(file, out BND3 partBND3))
+
+                if (FLVER2.IsRead(file, out FLVER2 flver))
                 {
-                    PatchParts(partBND3);
-                    partBND3.Write(file);
+                    PatchFlver(flver);
+                    flver.Write(file);
+                }
+
+            }
+        }
+        private static void TryPatchBND4(string file)
+        {
+            try
+            {
+                if (BND4.IsRead(file, out BND4 bnd4))
+                {
+                    PatchParts(bnd4);
+                    bnd4.Write(file);
+                }
+            }
+            catch (DllNotFoundException ex) when (ex.Message.Contains("oo2core_6_win64.dll"))
+            {
+                string oo2corePath = Util.GetOodlePath();
+                if (oo2corePath == null)
+                    throw;
+
+                OodleHandle = Kernel32.LoadLibrary(oo2corePath);
+                if (BND4.IsRead(file, out BND4 bnd4))
+                {
+                    PatchParts(bnd4);
+                    bnd4.Write(file);
                 }
 
             }
@@ -94,48 +122,32 @@ namespace Bounding_Box_Patch_Calculator
 
         private static void PatchParts(IBinder part)
         {
-        
 
-            for (int i = 0; i < part.Files.Count; i++)
+            foreach (BinderFile file in part.Files)
             {
-                if (part.Files[i].Name.EndsWith(".flver"))
+
+                if (FLVER2.IsRead(file.Bytes, out FLVER2 flver))
                 {
-                    var flver = FLVER2.Read(part.Files[i].Bytes);
-#if DEBUG
-                    PrintDebugInfo(flver);
-#endif
-                    BoundingBoxSolver.FixAllBoundingBoxes(flver);
-#if DEBUG
-                    PrintDebugInfo(flver);
-#endif
-                    part.Files[i].Bytes = flver.Write();
+                    PatchFlver(flver);
                 }
             }
         }
 
-        private static void PatchFlver(string file, FLVER2 flver)
+        private static void PatchFlver(FLVER2 flver)
         {
-            Console.WriteLine(file);
-
-            if (!File.Exists($"{file}.bak"))
-                File.Copy(file, $"{file}.bak");
-
 #if DEBUG
             PrintDebugInfo(flver);
 #endif
-
             BoundingBoxSolver.FixAllBoundingBoxes(flver);
 #if DEBUG
             PrintDebugInfo(flver);
 #endif
-            flver.Write(file);
         }
 
 #if DEBUG
         private static void PrintDebugInfo(FLVER2 flver)
         {
             Console.WriteLine();
-            //Console.WriteLine($"{file}");
             Console.WriteLine("Header");
             Console.WriteLine($"BBMin: {flver.Header.BoundingBoxMin}");
             Console.WriteLine($"BBMax: {flver.Header.BoundingBoxMax}");
